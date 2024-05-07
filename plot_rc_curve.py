@@ -9,28 +9,98 @@ sys.path.append(dir_path)
 import numpy as np
 import argparse
 import torch
+import scipy.stats as sstats
+from numpy.linalg import pinv
+from sklearn.covariance import EmpiricalCovariance
+from scipy.special import logsumexp
+import torch.nn.functional as F
+import faiss
+import pandas as pd
+# === For plotting ===
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import FormatStrFormatter
 import matplotlib.colors as mcolors
 import seaborn as sns
 sns.set_theme()
 COLORS = list(mcolors.TABLEAU_COLORS)
 CF_METHOD_STR_LIST = []
-DATASET_NAME_LIST = []
 PLOT_SYMBOL_DICT = {}
 
 
+def format_float_list(float_list):
+    res = []
+    for number in float_list:
+        res.append("%.03f" % number)
+    return res
+
+
+def calc_aurc_coverage(coverage_array, sc_risk_array, alphas=[0.1, 0.25, 0.5, 0.75, 1.0]):
+    total_len = len(coverage_array)
+    res_list = []
+    for alpha in alphas:
+        end_idx = int(alpha * total_len)
+        coverage_slice = coverage_array[-end_idx:]
+        risk_slice = sc_risk_array[-end_idx:]
+
+        AUC = np.sum(risk_slice) / len(coverage_slice) * 100
+        res_list.append(AUC)
+    return res_list
+
+
+def calculate_residual(pred, label):
+    """
+        residual --- 0 if pred == label
+                --- 1 if pred != label
+    """
+    pred_tensor = torch.from_numpy(pred)
+    label_tensor = torch.from_numpy(label)
+    predict_correct_bool = pred_tensor == label_tensor
+    residual_tensor = torch.where(predict_correct_bool, 0, 1)
+    return residual_tensor.cpu().numpy()
+
+
+def get_sirc_params(unc_mean, unc_std):
+    """
+        Adapted from: https://github.com/Guoxoug/SIRC
+    """
+    # remember that the values are negative
+    a = unc_mean - 3 * unc_std
+    # investigate effect of varying b
+    b = 1/ (unc_std + 1e-12)
+    return a, b
+
+
+def sirc(s1, s2, a, b, s1_max=1):
+    """
+        Adapted from: https://github.com/Guoxoug/SIRC
+        
+        Combine 2 confidence metrics with SIRC.
+    
+    """
+    s1_tensor = torch.from_numpy(s1)
+    s2_tensor = torch.from_numpy(s2)
+    # use logarithm for stability
+    soft = (s1_max - s1_tensor).log()
+    additional = torch.logaddexp(
+        torch.zeros(len(s2_tensor)),
+        -b * (s2_tensor - a) 
+    )
+    score = - soft - additional # return as confidence
+    return score.cpu().numpy()
+
+
 def calculate_score_residual(
-        logits, labels, features, weights, bias,
-        clean_set_features, clean_set_logits, training_based_scores=None
-    ):
+    logits, labels, features, weights, bias,
+    clean_set_features, clean_set_logits,
+):
     scores_dict = {}
     residuals_dict = {}
 
-    weight_norm = np.linalg.norm(weights, axis=1, ord=2)
-    # bias_aug = bias[:, np.newaxis]
-    # weight_aug = np.concatenate([weights, bias_aug], axis=1)
-    # weight_norm = np.linalg.norm(weight_aug, axis=1, ord=2)
+    # weight_norm = np.linalg.norm(weights, axis=1, ord=2)
+    bias_aug = bias[:, np.newaxis]
+    weight_aug = np.concatenate([weights, bias_aug], axis=1)
+    weight_norm = np.linalg.norm(weight_aug, axis=1, ord=2)
 
     # === Prepare sample set to compute H_res scores ===
     # vim_dim = 512
@@ -90,22 +160,12 @@ def calculate_score_residual(
         PLOT_SYMBOL_DICT[method_name] = [2, None, r"$SR_{ent}$", "solid"]
 
     # === Additional Methods from OODs ===
-    # # neg L1
-    # l1_norm = np.linalg.norm(features, axis=1, ord=1) * (-1)
-    # l1_norm_residuals = max_logit_residuals
-    # method_name = "l1_norm"
-    # scores_dict[method_name] = l1_norm
-    # residuals_dict[method_name] = l1_norm_residuals
-    # if method_name not in CF_METHOD_STR_LIST:
-    #     CF_METHOD_STR_LIST.append(method_name)
-    #     PLOT_SYMBOL_DICT[method_name] = [6, None, r"$||z||_1$"]
-
     # vim residual
     ec = EmpiricalCovariance(assume_centered=True)
     ec.fit(in_d_sampled_features - u)
     # ec.fit(in_d_sampled_features)
     eig_vals, eigen_vectors = np.linalg.eig(ec.covariance_)
-    print("Eig Vals: ", eig_vals)
+    # print("Eig Vals: ", eig_vals)
     NS = np.ascontiguousarray(
         (eigen_vectors.T[np.argsort(eig_vals * -1)[vim_dim:]]).T)
     vim_res_scores = (-1) * np.linalg.norm(np.matmul(features - u, NS), axis=-1)
@@ -198,8 +258,6 @@ def calculate_score_residual(
     react_energy_score = torch.logsumexp(
         torch.from_numpy(react_logits).to(dtype=torch.float), 
     dim=-1).numpy()
-    # react_pred = np.argmax(react_logits, axis=1)
-    # react_residuals = calculate_residual(react_pred, labels)
     react_residuals = max_logit_residuals
     method_name = "ReAct"
     scores_dict[method_name] = react_energy_score
@@ -210,7 +268,7 @@ def calculate_score_residual(
     
 
     # === OURS ====
-    # raw margin
+    # RL-conf-M
     values, indices = torch.topk(logits_tensor, 2, axis=1)
     raw_margin_scores = (values[:, 0] - values[:, 1]).cpu().numpy()
     raw_margin_pred = max_logit_pred
@@ -222,8 +280,7 @@ def calculate_score_residual(
         CF_METHOD_STR_LIST.append(method_name)
         PLOT_SYMBOL_DICT[method_name] = [4, "p", r"$RL_{conf-M}$", "solid"]
         
-
-    # geo_margin
+    # RL-geo-M
     geo_distance = logits / weight_norm[np.newaxis, :]
     geo_values, geo_indices = torch.topk(torch.from_numpy(geo_distance).to(dtype=torch.float), 2, axis=1)
     geo_margin_scores = (geo_values[:, 0] - geo_values[:, 1]).cpu().numpy()
@@ -235,12 +292,13 @@ def calculate_score_residual(
     if method_name not in CF_METHOD_STR_LIST:
         CF_METHOD_STR_LIST.append(method_name)
         PLOT_SYMBOL_DICT[method_name] = [3, "p", r"$RL_{geo-M}$", "solid"]
-        # PLOT_SYMBOL_DICT[method_name] = [3, "p", r"$S_1$"]
-
     return scores_dict, residuals_dict
 
 
 def read_data(dir, load_classifier_weight=False):
+    """
+        Read in the pre-collected data.
+    """
     raw_logits = np.load(os.path.join(dir, "pred_logits.npy"))
     labels = np.load(os.path.join(dir, "labels.npy"))
     features = np.load(os.path.join(dir, "features.npy"))
@@ -253,25 +311,173 @@ def read_data(dir, load_classifier_weight=False):
     return raw_logits, labels, features, last_layer_weights, last_layer_bias
 
 
+def RC_curve(residuals, confidence):
+    """
+        Calculate each point on the RC curve based on residuals and SC scores.
+    """
+    curve = []
+    m = len(residuals)
+    idx_sorted = np.argsort(confidence)
+    temp1 = residuals[idx_sorted]
+    cov = len(temp1)
+    acc = sum(temp1)
+    curve.append((cov/ m, acc / len(temp1)))
+    for i in range(0, len(idx_sorted)-1):
+        cov = cov-1
+        acc = acc-residuals[idx_sorted[i]]
+        curve.append((cov / m, acc /(m-i)))
+    curve = np.asarray(curve)
+    coverage, risk = curve[:, 0], curve[:, 1]
+    return coverage, risk
+
+
+def select_RC_curve_points(coverage_array, risk_array, n_plot_points=40,  min_n_samples=-10):
+    """
+        Evenly sample some RC points to display.
+    """
+    plot_interval = len(coverage_array) // n_plot_points
+    coverage_plot, risk_plot = coverage_array[0::plot_interval].tolist(), risk_array[0::plot_interval].tolist()
+    coverage_plot.append(coverage_array[min_n_samples])
+    risk_plot.append(risk_array[min_n_samples])
+    return coverage_plot, risk_plot
+
+
+def plot_rc_curve_demo(total_scores_dict, total_residuals_dict, fig_name, method_name_list=None):
+    """
+        Plot the RC curve for each score, respectively.
+    """
+    coverage_dict, risk_dict = {}, {}
+
+    if method_name_list is None:
+        method_name_list = CF_METHOD_STR_LIST
+
+    for method_name in method_name_list:
+        coverage, sc_risk = RC_curve(
+            total_residuals_dict[method_name], total_scores_dict[method_name]
+        )
+        coverage_dict[method_name] = coverage
+        risk_dict[method_name] = sc_risk
+
+    # === Plot RC Curve ===
+    plot_n_points = 30
+    min_num_samples = -100
+    save_path = fig_name
+    line_width = 4
+    markersize = 8
+    alpha = 0.5
+
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
+    font_size = 19
+    tick_size = 20
+
+    y_min = 0
+    y_max = 0
+    for method_name in method_name_list:
+        coverage_plot, sc_risk_plot = coverage_dict[method_name], risk_dict[method_name]
+        x_plot, y_plot = select_RC_curve_points(coverage_plot, sc_risk_plot, plot_n_points, min_num_samples)
+        y_max, y_min = max(y_plot[0], y_max), min(np.amin(y_plot), y_min)
+        # y_max, y_min = max(np.amax(y_plot), y_max), min(np.amin(y_plot), y_min)
+        plot_settings = PLOT_SYMBOL_DICT[method_name]
+        ax.plot(
+            x_plot, y_plot,
+            label=plot_settings[2], lw=line_width, alpha=alpha,
+            color=COLORS[plot_settings[0]], marker=plot_settings[1], ls=plot_settings[3], markersize=markersize
+        )
+
+    ax.legend(
+        loc='lower left', bbox_to_anchor=(-0.25, 1, 1.25, 0.2), mode="expand", 
+        borderaxespad=0,
+        ncol=3, fancybox=True, shadow=False, fontsize=font_size, framealpha=0.3
+    )
+    ax.tick_params(axis='x', which='major', colors='black', labelsize=tick_size)
+    ax.tick_params(axis='y', which='major', colors='black', labelsize=tick_size)
+    ax.set_ylabel(r"Selection Risk", fontsize=font_size)
+    ax.set_xlabel(r"Coverage", fontsize=font_size)
+    ax.set_ylim([y_min-0.05*y_max, 1.10*y_max])
+    # ax.set_xticks([0, 0.5, 1])
+    ax.set_xticks([0, 0.5, 1])
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax.set_xlim([-0.02, 1.05])
+    # ax.yaxis.set_major_locator(MaxNLocator(3))
+    ax.set_yticks([y_max/2, y_max])
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    fig.tight_layout()
+    plt.savefig(save_path)
+    plt.close(fig)
+    return coverage_dict, risk_dict
+
+
 def main(args):
     # === Load collected data ===
     load_data_root = args.data_dir
-    logits, labels, features, last_layer_weights, last_layer_bias = read_data(load_data_root, True)
-    print("Shape Check: ", logits.shape, labels.shape, features.shape)
+    # Below loads pre-collected ImageNet (val) data
+    in_logits, in_labels, in_features, last_layer_weights, last_layer_bias = read_data(load_data_root, True)
+    print("Shape Check: ", in_logits.shape, in_labels.shape, in_features.shape)
+
+    # === Get calibration set indices ===
+    # Below are only used for OOD detection scores
+    # According to the OOD literature, these should be collected using training (not validation) data
+    # However, we assume no-access to training data in our work, so we sample a small subset in the validation set
+    # (which is in fact the test set for SC scores), so the OOD scores have a little advantage in this sense.
+    in_set_length = in_features.shape[0]
+    cali_indices = np.random.choice(in_set_length, args.cali_size, replace=False)
+    cali_features = in_features[cali_indices, :]
+    cali_logits = in_logits[cali_indices, :]
 
     # === Calculate Scores and Residuals for RC ===
     in_scores_dict, in_residuals_dict = calculate_score_residual(
         in_logits, in_labels, in_features, last_layer_weights, last_layer_bias,
-        clean_set_features=cali_features, clean_set_logits=cali_logits, training_based_scores=in_train_based_scores
+        clean_set_features=cali_features, clean_set_logits=cali_logits
     )
 
+    # === Generate RC curve ====
+    method_name_list = CF_METHOD_STR_LIST
+    save_root = os.path.join(".", "Demo-Vis")
+    os.makedirs(save_root, exist_ok=True)
+    fig_name = "RC-test.png"
+    save_path = os.path.join(save_root, fig_name)
+    # Plot RC curve to 'save_path', and return the plot values for AURC calculation
+    coverage_dict, residual_dict = plot_rc_curve_demo(
+        in_scores_dict, in_residuals_dict, save_path,
+        method_name_list=method_name_list
+    )
+    # Calculate 
+    alphas = [0.1, 0.5, 1]
+    aurc_res_dict = {"alpha": alphas}
+    for method_name in method_name_list:
+        coverage_array, residual_array = coverage_dict[method_name], residual_dict[method_name]
+        aurc_partial_list = calc_aurc_coverage(coverage_array, residual_array, alphas)
+        aurc_res_dict[method_name] = format_float_list(aurc_partial_list)
+    save_aurc_dir = os.path.join(save_root, "Demo-AURC.csv")
+    df = pd.DataFrame.from_dict(aurc_res_dict).T
+    df.to_csv(save_aurc_dir, index=True, header=False)
+
+
+
 if __name__ == "__main__":
-    print("Plotting RC curve using collected data.")
+    print("Plotting RC curve using collected data.\n")
+    msg = """
+    Due to the large amount of data involed in the original paper, here we only provide an RC curve sample using:
+
+    1) ImageNet (val) set 
+    2) collected by EVA model
+
+    only. That means this demo does NOT have any distribution shifted data.
+
+    However, we did include all non-training based SC and OOD scores to profile the RC curves to make it a little more convenient if the readers
+
+    want to try their own experiments with their own data collected. """
+    print(msg)
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--data_dir", dest="data_dir", type=str,
-        default=os.path.join(".", "collected_data_0"),
+        default=os.path.join(".", "collected_data"),
         help="Folder where the collected logits data are located."
+    )
+    parser.add_argument(
+        "--cali_size", dest="cali_size", type=int,
+        default=5,
+        help="Calibration data size used to determin the OOD score hyper params."
     )
     args = parser.parse_args()
     main(args)
