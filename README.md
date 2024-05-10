@@ -1,11 +1,16 @@
 # sc_with_distshift
 
-This repo contains the source code for paper [PAPER NAME](PAPER_LINK).
+This repo contains the source code for paper [Selective Classification Under Distribution Shifts](https://arxiv.org/abs/2405.05160).
 
 If you find our work interesting or helpful, please consider a generous citation of our paper:
 
 ```
-BIB ITEM TO CITE OUR PAPER
+@article{liang2024selective,
+  title={Selective Classification Under Distribution Shifts},
+  author={Hengyue Liang and Le Peng and Ju Sun},
+  journal={arXiv preprint 	arXiv:2405.05160},
+  year={2024}
+}
 ```
 
 ## Introduction
