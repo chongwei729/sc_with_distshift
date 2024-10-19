@@ -34,8 +34,9 @@ NUM_WORKER = 4
 
 
 def main(args):
-    device = torch.device("cuda")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dtype = torch.float
+
 
     # Directory to save the collected data
     save_root = os.path.join(".", "collected_data")
@@ -48,6 +49,7 @@ def main(args):
         split="val",
         transform=VAL_TRANSFORM_TIMM
     )
+
     loader_val = DataLoader(
         dataset_val, batch_size=BATCH_SIZE, 
         shuffle=False, pin_memory=False,
@@ -108,7 +110,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--dataset_dir", dest="dataset_dir", type=str,
-        default="C:\\Users\\Liang\\dataset\\ImageNet",
+        default="/users/9/chen8596/sc_with_distshift",
         help="Path to the imagenet (val) set."
     )
     args = parser.parse_args()

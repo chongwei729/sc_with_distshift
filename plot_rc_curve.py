@@ -407,6 +407,9 @@ def plot_rc_curve_demo(total_scores_dict, total_residuals_dict, fig_name, method
     return coverage_dict, risk_dict
 
 
+
+
+
 def main(args):
     # === Load collected data ===
     load_data_root = args.data_dir
@@ -432,6 +435,7 @@ def main(args):
 
     # === Generate RC curve ====
     method_name_list = CF_METHOD_STR_LIST
+    print(method_name_list)
     save_root = os.path.join(".", "Demo-Vis")
     os.makedirs(save_root, exist_ok=True)
     fig_name = "RC-test.png"
