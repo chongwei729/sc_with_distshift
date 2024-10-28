@@ -163,7 +163,7 @@ cython_debug/
 .idea/
 
 
-output_log.txt
+
 error_log.txt
 meta.bin
 ILSVRC2012_devkit_t12.tar.gz    

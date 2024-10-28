@@ -1,0 +1,92 @@
+ERROR: Unable to locate a modulefile for 'python/3.12'
+ERROR: Unable to locate a modulefile for 'cuda/11.1'
+Starting job on cn2101 at Sun Oct 27 20:49:59 CDT 2024
+computing alpha...
+alpha=649448.3125
+Similarity distribution for max_logit:
+70-75: 94 points
+75-80: 35 points
+80-85: 23 points
+85-90: 17 points
+90-95: 29 points
+95-100: 44 points
+Similarity distribution for max_sr:
+70-75: 192 points
+75-80: 78 points
+80-85: 49 points
+85-90: 38 points
+90-95: 61 points
+95-100: 96 points
+Similarity distribution for doctor:
+70-75: 292 points
+75-80: 108 points
+80-85: 70 points
+85-90: 56 points
+90-95: 80 points
+95-100: 147 points
+Similarity distribution for entropy:
+70-75: 391 points
+75-80: 143 points
+80-85: 93 points
+85-90: 73 points
+90-95: 102 points
+95-100: 219 points
+Similarity distribution for vim_residual:
+70-75: 498 points
+75-80: 175 points
+80-85: 110 points
+85-90: 87 points
+90-95: 128 points
+95-100: 270 points
+Similarity distribution for vim:
+70-75: 574 points
+75-80: 217 points
+80-85: 124 points
+85-90: 102 points
+90-95: 149 points
+95-100: 323 points
+Similarity distribution for sirc:
+70-75: 677 points
+75-80: 258 points
+80-85: 142 points
+85-90: 119 points
+90-95: 171 points
+95-100: 390 points
+Similarity distribution for knn:
+70-75: 771 points
+75-80: 297 points
+80-85: 178 points
+85-90: 139 points
+90-95: 195 points
+95-100: 432 points
+Similarity distribution for energy:
+70-75: 865 points
+75-80: 337 points
+80-85: 200 points
+85-90: 162 points
+90-95: 219 points
+95-100: 476 points
+Similarity distribution for ReAct:
+70-75: 950 points
+75-80: 358 points
+80-85: 231 points
+85-90: 180 points
+90-95: 253 points
+95-100: 519 points
+Similarity distribution for raw_margin:
+70-75: 1048 points
+75-80: 403 points
+80-85: 247 points
+85-90: 203 points
+90-95: 276 points
+95-100: 566 points
+Similarity distribution for geo_margin:
+70-75: 1140 points
+75-80: 443 points
+80-85: 268 points
+85-90: 217 points
+90-95: 299 points
+95-100: 616 points
+Plot saved at ./similarity_vs_confidence_residual_geo_margin.png
+Completed.
+Job finished with exit code 0 at: Sun Oct 27 20:54:34 CDT 2024

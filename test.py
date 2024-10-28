@@ -6,6 +6,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
+from collections import Counter
+import json
+from torchvision import models
+
+
 
 def compare_two_points_confidence(scores_dict, data, point1, point2, method="max_logit"):
 
@@ -23,16 +28,6 @@ def compare_two_points_confidence(scores_dict, data, point1, point2, method="max
 
     return confidence_residual, similarity
 
-def plot_similarity_vs_residual(similarities, residuals, output_path, method="max_logit"):
-
-    plt.figure(figsize=(8, 6))
-    plt.scatter(similarities, residuals, c='blue', alpha=0.5)
-    plt.title(f"Similarity vs Confidence Residual {method}")
-    plt.xlabel("Similarity")
-    plt.ylabel("Confidence Residual")
-    plt.grid(True)
-    plt.savefig(output_path)
-    plt.close()
 
 def main(args):
     load_data_root = args.data_dir
@@ -58,6 +53,7 @@ def main(args):
 
     similarities = []
     confidence_residuals = []
+    colors = []
     for key in in_scores_dict:
         for _ in range(100000):
             i = random.randint(0, in_set_length - 1)
@@ -67,9 +63,46 @@ def main(args):
             similarities.append(similarity)
             confidence_residuals.append(confidence_residual)
 
+            similarity_bins = [f"{i}-{i+5}" for i in range(70, 100, 5)]
+            similarity_counts = Counter({bin_label: 0 for bin_label in similarity_bins})
+
+            if in_labels[i] == in_labels[j]:
+                colors.append('blue')  
+            else:
+                colors.append('red')  
+
+        for similarity in similarities:
+            if similarity * 100 >= 70:
+                for i in range(70, 100, 5):
+                    if i <= (similarity * 100) < i + 5:
+                        bin_label = f"{i}-{i+5}"
+                        similarity_counts[bin_label] += 1
+                        break
+
+
+        print(f"Similarity distribution for {key}:")
+        for bin_label, count in similarity_counts.items():
+            print(f"{bin_label}: {count} points")
+            
+        max_conf = np.max(confidence_residuals)
+        normalized_confidence_residuals = [x / max_conf for x in confidence_residuals]    
+
+  
+
+
 
         output_path = os.path.join(".", f"similarity_vs_confidence_residual_{key}.png")
-        plot_similarity_vs_residual(similarities, confidence_residuals, output_path, key)
+        plt.figure(figsize=(8, 6))
+        plt.scatter(similarities, normalized_confidence_residuals, c=colors, alpha=0.6, edgecolors='w', linewidth=0.5)
+        plt.xlabel('Similarity')
+        plt.ylabel('Normalized Confidence Residual')
+        plt.title(f'Similarity vs. Confidence Residual ({key})')
+        plt.colorbar(label='Same Class: Blue, Different Class: Red', ticks=[0, 1], orientation='vertical')
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(output_path)
+        plt.close()
+
 
     print(f"Plot saved at {output_path}")
 
