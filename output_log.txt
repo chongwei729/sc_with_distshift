@@ -1,92 +1,140 @@
 ERROR: Unable to locate a modulefile for 'python/3.12'
 ERROR: Unable to locate a modulefile for 'cuda/11.1'
-Starting job on cn2103 at Mon Oct 28 12:57:21 CDT 2024
+Starting job on cn2102 at Mon Oct 28 13:28:02 CDT 2024
 computing alpha...
-alpha=644156.6875
+alpha=617718.0625
 Similarity distribution for max_logit:
-70-75: 86 points
-75-80: 35 points
+70-75: 92 points
+75-80: 37 points
 80-85: 22 points
-85-90: 22 points
-90-95: 28 points
-95-100: 41 points
-Similarity distribution for max_sr:
-70-75: 86 points
-75-80: 34 points
-80-85: 16 points
 85-90: 16 points
-90-95: 26 points
-95-100: 60 points
+90-95: 28 points
+95-100: 42 points
+100000
+Counter({'70-75': 92, '95-100': 42, '75-80': 37, '90-95': 28, '80-85': 22, '85-90': 16})
+confidence residuals: 100000
+normalized: 100000
+Similarity distribution for max_sr:
+70-75: 91 points
+75-80: 40 points
+80-85: 21 points
+85-90: 19 points
+90-95: 28 points
+95-100: 61 points
+100000
+Counter({'70-75': 91, '95-100': 61, '75-80': 40, '90-95': 28, '80-85': 21, '85-90': 19})
+confidence residuals: 100000
+normalized: 100000
 Similarity distribution for doctor:
-70-75: 96 points
-75-80: 25 points
-80-85: 20 points
+70-75: 77 points
+75-80: 36 points
+80-85: 24 points
+85-90: 13 points
+90-95: 21 points
+95-100: 60 points
+100000
+Counter({'70-75': 77, '95-100': 60, '75-80': 36, '80-85': 24, '90-95': 21, '85-90': 13})
+confidence residuals: 100000
+normalized: 100000
+Similarity distribution for entropy:
+70-75: 95 points
+75-80: 35 points
+80-85: 18 points
 85-90: 18 points
 90-95: 18 points
 95-100: 51 points
-Similarity distribution for entropy:
-70-75: 88 points
-75-80: 30 points
-80-85: 17 points
-85-90: 21 points
-90-95: 17 points
-95-100: 45 points
+100000
+Counter({'70-75': 95, '95-100': 51, '75-80': 35, '80-85': 18, '85-90': 18, '90-95': 18})
+confidence residuals: 100000
+normalized: 100000
 Similarity distribution for vim_residual:
-70-75: 88 points
-75-80: 27 points
+70-75: 86 points
+75-80: 42 points
 80-85: 16 points
-85-90: 22 points
-90-95: 24 points
-95-100: 59 points
-Similarity distribution for vim:
-70-75: 70 points
-75-80: 30 points
-80-85: 20 points
-85-90: 21 points
-90-95: 24 points
-95-100: 36 points
-Similarity distribution for sirc:
-70-75: 101 points
-75-80: 28 points
-80-85: 25 points
 85-90: 24 points
-90-95: 24 points
-95-100: 50 points
-Similarity distribution for knn:
-70-75: 95 points
-75-80: 47 points
-80-85: 20 points
-85-90: 20 points
-90-95: 33 points
-95-100: 62 points
-Similarity distribution for energy:
-70-75: 88 points
-75-80: 45 points
-80-85: 27 points
-85-90: 15 points
+90-95: 25 points
+95-100: 61 points
+100000
+Counter({'70-75': 86, '95-100': 61, '75-80': 42, '90-95': 25, '85-90': 24, '80-85': 16})
+confidence residuals: 100000
+normalized: 100000
+Similarity distribution for vim:
+70-75: 110 points
+75-80: 29 points
+80-85: 22 points
+85-90: 18 points
 90-95: 22 points
 95-100: 53 points
-Similarity distribution for ReAct:
-70-75: 109 points
-75-80: 40 points
-80-85: 25 points
+100000
+Counter({'70-75': 110, '95-100': 53, '75-80': 29, '80-85': 22, '90-95': 22, '85-90': 18})
+confidence residuals: 100000
+normalized: 100000
+Similarity distribution for sirc:
+70-75: 78 points
+75-80: 39 points
+80-85: 27 points
+85-90: 19 points
+90-95: 26 points
+95-100: 55 points
+100000
+Counter({'70-75': 78, '95-100': 55, '75-80': 39, '80-85': 27, '90-95': 26, '85-90': 19})
+confidence residuals: 100000
+normalized: 100000
+Similarity distribution for knn:
+70-75: 91 points
+75-80: 28 points
+80-85: 22 points
+85-90: 19 points
+90-95: 24 points
+95-100: 52 points
+100000
+Counter({'70-75': 91, '95-100': 52, '75-80': 28, '90-95': 24, '80-85': 22, '85-90': 19})
+confidence residuals: 100000
+normalized: 100000
+Similarity distribution for energy:
+70-75: 98 points
+75-80: 26 points
+80-85: 20 points
 85-90: 13 points
-90-95: 29 points
-95-100: 58 points
+90-95: 20 points
+95-100: 59 points
+100000
+Counter({'70-75': 98, '95-100': 59, '75-80': 26, '80-85': 20, '90-95': 20, '85-90': 13})
+confidence residuals: 100000
+normalized: 100000
+Similarity distribution for ReAct:
+70-75: 93 points
+75-80: 26 points
+80-85: 37 points
+85-90: 22 points
+90-95: 17 points
+95-100: 77 points
+100000
+Counter({'70-75': 93, '95-100': 77, '80-85': 37, '75-80': 26, '85-90': 22, '90-95': 17})
+confidence residuals: 100000
+normalized: 100000
 Similarity distribution for raw_margin:
-70-75: 100 points
-75-80: 30 points
-80-85: 17 points
-85-90: 21 points
-90-95: 31 points
-95-100: 56 points
+70-75: 91 points
+75-80: 35 points
+80-85: 22 points
+85-90: 17 points
+90-95: 28 points
+95-100: 51 points
+100000
+Counter({'70-75': 91, '95-100': 51, '75-80': 35, '90-95': 28, '80-85': 22, '85-90': 17})
+confidence residuals: 100000
+normalized: 100000
 Similarity distribution for geo_margin:
-70-75: 94 points
-75-80: 33 points
-80-85: 19 points
-85-90: 23 points
-90-95: 25 points
-95-100: 53 points
+70-75: 81 points
+75-80: 31 points
+80-85: 18 points
+85-90: 18 points
+90-95: 19 points
+95-100: 56 points
+100000
+Counter({'70-75': 81, '95-100': 56, '75-80': 31, '90-95': 19, '80-85': 18, '85-90': 18})
+confidence residuals: 100000
+normalized: 100000
 Plot saved at ./similarity_vs_confidence_residual_geo_margin.png
 Completed.
-Job finished with exit code 0 at: Mon Oct 28 12:58:37 CDT 2024
+Job finished with exit code 0 at: Mon Oct 28 13:29:09 CDT 2024

@@ -50,12 +50,11 @@ def main(args):
         'labels': in_labels
     }
 
-
+    similarity_bins = [f"{i}-{i+5}" for i in range(70, 100, 5)]
     for key in in_scores_dict:
         similarities = []
         confidence_residuals = []
         colors = []
-        similarity_bins = [f"{i}-{i+5}" for i in range(70, 100, 5)]
         similarity_counts = Counter({bin_label: 0 for bin_label in similarity_bins})
         for _ in range(100000):
             i = random.randint(0, in_set_length - 1)
@@ -88,6 +87,10 @@ def main(args):
             
         max_conf = np.max(confidence_residuals)
         normalized_confidence_residuals = [x / max_conf for x in confidence_residuals]    
+        print(len(similarities))
+        print(similarity_counts)
+        print("confidence residuals:", len(confidence_residuals))
+        print("normalized:",len(normalized_confidence_residuals))
 
   
 
