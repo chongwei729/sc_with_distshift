@@ -1,92 +1,140 @@
 ERROR: Unable to locate a modulefile for 'python/3.12'
 ERROR: Unable to locate a modulefile for 'cuda/11.1'
-Starting job on cn2103 at Mon Oct 28 13:50:22 CDT 2024
+Starting job on cn2103 at Mon Oct 28 14:00:03 CDT 2024
 computing alpha...
-alpha=614428.8125
+alpha=631626.2500
 Similarity distribution for max_logit:
-70-75: 97 points
-75-80: 25 points
-80-85: 20 points
-85-90: 19 points
-90-95: 19 points
-95-100: 56 points
-Similarity distribution for max_sr:
-70-75: 94 points
-75-80: 27 points
-80-85: 24 points
-85-90: 18 points
-90-95: 33 points
-95-100: 54 points
-Similarity distribution for doctor:
-70-75: 98 points
-75-80: 26 points
-80-85: 27 points
-85-90: 18 points
-90-95: 23 points
-95-100: 54 points
-Similarity distribution for entropy:
-70-75: 100 points
-75-80: 31 points
-80-85: 23 points
-85-90: 13 points
-90-95: 23 points
-95-100: 51 points
-Similarity distribution for vim_residual:
-70-75: 82 points
-75-80: 26 points
-80-85: 20 points
-85-90: 22 points
-90-95: 31 points
-95-100: 56 points
-Similarity distribution for vim:
-70-75: 79 points
-75-80: 40 points
-80-85: 24 points
-85-90: 16 points
-90-95: 17 points
-95-100: 57 points
-Similarity distribution for sirc:
-70-75: 80 points
+50-55: 15437 points
+55-60: 62179 points
+60-65: 20627 points
+65-70: 863 points
+70-75: 85 points
 75-80: 37 points
-80-85: 27 points
-85-90: 15 points
+80-85: 14 points
+85-90: 25 points
+90-95: 23 points
+95-100: 60 points
+Similarity distribution for max_sr:
+50-55: 15927 points
+55-60: 61755 points
+60-65: 20553 points
+65-70: 856 points
+70-75: 87 points
+75-80: 36 points
+80-85: 22 points
+85-90: 20 points
+90-95: 27 points
+95-100: 52 points
+Similarity distribution for doctor:
+50-55: 15729 points
+55-60: 61949 points
+60-65: 20516 points
+65-70: 892 points
+70-75: 95 points
+75-80: 30 points
+80-85: 16 points
+85-90: 18 points
 90-95: 25 points
 95-100: 52 points
+Similarity distribution for entropy:
+50-55: 15730 points
+55-60: 61811 points
+60-65: 20734 points
+65-70: 816 points
+70-75: 95 points
+75-80: 38 points
+80-85: 25 points
+85-90: 21 points
+90-95: 22 points
+95-100: 58 points
+Similarity distribution for vim_residual:
+50-55: 15737 points
+55-60: 61872 points
+60-65: 20620 points
+65-70: 841 points
+70-75: 76 points
+75-80: 40 points
+80-85: 25 points
+85-90: 17 points
+90-95: 28 points
+95-100: 59 points
+Similarity distribution for vim:
+50-55: 15685 points
+55-60: 61746 points
+60-65: 20815 points
+65-70: 831 points
+70-75: 91 points
+75-80: 33 points
+80-85: 13 points
+85-90: 21 points
+90-95: 25 points
+95-100: 58 points
+Similarity distribution for sirc:
+50-55: 15722 points
+55-60: 62053 points
+60-65: 20451 points
+65-70: 849 points
+70-75: 95 points
+75-80: 37 points
+80-85: 22 points
+85-90: 22 points
+90-95: 17 points
+95-100: 57 points
 Similarity distribution for knn:
-70-75: 108 points
-75-80: 32 points
+50-55: 15740 points
+55-60: 61813 points
+60-65: 20672 points
+65-70: 828 points
+70-75: 94 points
+75-80: 27 points
 80-85: 19 points
+85-90: 14 points
+90-95: 31 points
+95-100: 65 points
+Similarity distribution for energy:
+50-55: 15535 points
+55-60: 62024 points
+60-65: 20723 points
+65-70: 811 points
+70-75: 80 points
+75-80: 39 points
+80-85: 21 points
+85-90: 23 points
+90-95: 20 points
+95-100: 54 points
+Similarity distribution for ReAct:
+50-55: 15828 points
+55-60: 61757 points
+60-65: 20660 points
+65-70: 828 points
+70-75: 90 points
+75-80: 36 points
+80-85: 18 points
+85-90: 25 points
+90-95: 26 points
+95-100: 54 points
+Similarity distribution for raw_margin:
+50-55: 15790 points
+55-60: 61935 points
+60-65: 20521 points
+65-70: 875 points
+70-75: 85 points
+75-80: 34 points
+80-85: 23 points
 85-90: 18 points
 90-95: 22 points
-95-100: 51 points
-Similarity distribution for energy:
-70-75: 94 points
-75-80: 37 points
-80-85: 17 points
-85-90: 18 points
-90-95: 21 points
-95-100: 50 points
-Similarity distribution for ReAct:
-70-75: 98 points
-75-80: 37 points
-80-85: 28 points
-85-90: 18 points
-90-95: 19 points
-95-100: 55 points
-Similarity distribution for raw_margin:
-70-75: 79 points
-75-80: 29 points
-80-85: 26 points
-85-90: 14 points
-90-95: 24 points
-95-100: 40 points
+95-100: 47 points
 Similarity distribution for geo_margin:
-70-75: 81 points
-75-80: 26 points
-80-85: 25 points
-85-90: 22 points
-90-95: 24 points
-95-100: 54 points
+50-55: 15763 points
+55-60: 61907 points
+60-65: 20559 points
+65-70: 850 points
+70-75: 89 points
+75-80: 23 points
+80-85: 23 points
+85-90: 14 points
+90-95: 26 points
+95-100: 51 points
 Plot saved at ./similarity_vs_confidence_residual_geo_margin.png
 Completed.
-Job finished with exit code 0 at: Mon Oct 28 13:51:38 CDT 2024
+Job finished with exit code 0 at: Mon Oct 28 14:01:20 CDT 2024

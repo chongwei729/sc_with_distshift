@@ -50,7 +50,7 @@ def main(args):
         'labels': in_labels
     }
 
-    similarity_bins = [f"{i}-{i+5}" for i in range(70, 100, 5)]
+    similarity_bins = [f"{i}-{i+5}" for i in range(50, 100, 5)]
     for key in in_scores_dict:
         similarities = []
         confidence_residuals = []
@@ -73,8 +73,7 @@ def main(args):
                 colors.append('red')  
 
         for similarity in similarities:
-            if similarity * 100 >= 70:
-                for i in range(70, 100, 5):
+                for i in range(50, 100, 5):
                     if i <= (similarity * 100) < i + 5:
                         bin_label = f"{i}-{i+5}"
                         similarity_counts[bin_label] += 1
