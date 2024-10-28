@@ -7,8 +7,7 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 from collections import Counter
-import json
-from torchvision import models
+from matplotlib.lines import Line2D
 
 
 
@@ -51,10 +50,13 @@ def main(args):
         'labels': in_labels
     }
 
-    similarities = []
-    confidence_residuals = []
-    colors = []
+
     for key in in_scores_dict:
+        similarities = []
+        confidence_residuals = []
+        colors = []
+        similarity_bins = [f"{i}-{i+5}" for i in range(70, 100, 5)]
+        similarity_counts = Counter({bin_label: 0 for bin_label in similarity_bins})
         for _ in range(100000):
             i = random.randint(0, in_set_length - 1)
             j = random.randint(0, in_set_length - 1)
@@ -63,8 +65,8 @@ def main(args):
             similarities.append(similarity)
             confidence_residuals.append(confidence_residual)
 
-            similarity_bins = [f"{i}-{i+5}" for i in range(70, 100, 5)]
-            similarity_counts = Counter({bin_label: 0 for bin_label in similarity_bins})
+
+
 
             if in_labels[i] == in_labels[j]:
                 colors.append('blue')  
@@ -97,7 +99,17 @@ def main(args):
         plt.xlabel('Similarity')
         plt.ylabel('Normalized Confidence Residual')
         plt.title(f'Similarity vs. Confidence Residual ({key})')
-        plt.colorbar(label='Same Class: Blue, Different Class: Red', ticks=[0, 1], orientation='vertical')
+        for idx, (bin_label, count) in enumerate(similarity_counts.items()):
+            bin_start, bin_end = [int(x) for x in bin_label.split('-')]
+            avg_similarity = (bin_start + bin_end) / 200
+            plt.text(avg_similarity, 1.05, f"{count}", ha='center', fontsize=8, color="black")
+        
+        legend_elements = [
+            Line2D([0], [0], marker='o', color='w', label='Same Class', markerfacecolor='blue', markersize=10),
+            Line2D([0], [0], marker='o', color='w', label='Different Class', markerfacecolor='red', markersize=10)
+        ]
+        plt.legend(handles=legend_elements, loc='upper right')
+
         plt.grid(True)
         plt.tight_layout()
         plt.savefig(output_path)
